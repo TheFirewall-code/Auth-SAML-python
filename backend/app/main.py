@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from routes.user_routes import user_router
 from routes.auth_routes import auth_router
 from routes.custom_routes import custom_router
+from routes.role_routes import role_router
 import os
 
 load_dotenv()
@@ -21,14 +22,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-print("OKTA_DOMAIN:", os.getenv("OKTA_DOMAIN"))
-print("OKTA_CLIENT_ID:", os.getenv("OKTA_CLIENT_ID"))
-print("OKTA_CLIENT_SECRET:", os.getenv("OKTA_CLIENT_SECRET"))
-print("OKTA_REDIRECT_URI:", os.getenv("OKTA_REDIRECT_URI"))
 
 app.include_router(user_router, prefix="/user", tags=["User"])
 app.include_router(auth_router, prefix="/auth", tags=["Auth"])
+app.include_router(role_router, prefix="/roles", tags=["Roles"])
+
 app.include_router(custom_router, prefix="/custom", tags=["Custom"])
+app.include_router(role_router, prefix="/api")
 
 if __name__ == "__main__":
     import uvicorn

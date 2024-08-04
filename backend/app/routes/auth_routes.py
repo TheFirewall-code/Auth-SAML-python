@@ -5,12 +5,42 @@ from urllib.parse import urlencode
 from controllers.auth_controller import pkce_pair, okta_domain, client_id, client_secret, redirect_uri
 from controllers.decode_token import decode_access_token
 from pydantic import BaseModel
-
+from db.admin_config import change_admin_password, verify_admin_login
 
 auth_router = APIRouter()
 
 class TokenRequest(BaseModel):
     token: str
+
+
+
+@auth_router.post('/admin/login')
+async def admin_login(request: Request, response: Response):
+    request_body = await request.json()
+    username = request_body.get('username')
+    password = request_body.get('password')
+    
+    admin = verify_admin_login(username, password)
+    if admin:
+        return {
+            "message": "Admin login successful",
+            "status": True,
+            "initialLogin": admin.get('initialLogin')
+        }
+    else:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+@auth_router.post('/admin/change/pass')
+async def admin_change_password(request: Request):
+    request_body = await request.json()
+    print(request_body)
+    username = "admin"
+    new_password = request_body.get('password')
+    
+    if change_admin_password(username, new_password):
+        return {"message": "Password updated successfully", "status": True}
+    else:
+        raise HTTPException(status_code=404, detail="Admin user not found")
 
 
 
